@@ -1,0 +1,103 @@
+# MAGNET-AD Configuration File
+# Faithful implementation following the paper description
+
+seed: 42
+
+paths:
+  data_dir: ./brain_graphs
+  clinical_csv: ../cleaned_data.csv
+  output_dir: ./results
+
+model:
+  # Model architecture parameters following the paper
+  structure_input_dim: 107  # 107-dimensional radiomic features (projected to 512)
+  gene_input_dim: 768       # 768-dimensional gene embeddings (projected to 512)
+  hidden_channels: 512      # Hidden dimension for all layers
+  num_spatial_layers: 3     # Number of spatial attention layers
+  num_heads: 8              # Number of attention heads
+  dropout: 0.1              # Dropout rate
+  
+  # Clinical data processing
+  csv_hidden_dim: 64
+  csv_output_dim: 32
+  
+  # Task-specific parameters
+  deephit_duration_index: 100  # Number of time bins for survival analysis
+  use_temporal_dynamics: true  # Enable temporal propagation
+  
+training:
+  # Training parameters
+  batch_size: 16              # Smaller batch size for better gradient estimates
+  learning_rate: 0.001        # Increased LR for better learning
+  weight_decay: 0.001         # Increased L2 regularization
+  max_epochs: 150             # Maximum training epochs
+  patience: 25                # Reduced early stopping patience
+  grad_clip_norm: 0.5         # Reduced gradient clipping
+  bold_threshold: 100          # BOLD correlation threshold percentile
+  # Additional regularization
+  alpha_lr_scale: 0.1         # Lower learning rate for alpha weights
+  temporal_gain: 1.0          # Reduced temporal gain
+  
+  # Optimizer parameters
+  optimizer_beta1: 0.9
+  optimizer_beta2: 0.999
+
+scheduler:
+  # Learning rate scheduler
+  name: "ReduceLROnPlateau"
+  mode: "max"                 # Monitor validation C-index
+  factor: 0.7                 # Less aggressive LR reduction
+  patience: 15                # More patience before reducing LR
+  threshold: 0.005            # Smaller improvement threshold
+  min_lr: 0.00001            # Higher minimum learning rate
+
+loss:
+  # Hybrid loss function parameters as described in the paper
+  deephit_alpha: 0.2          # DeepHit ranking loss weight
+  deephit_sigma: 0.1          # DeepHit ranking margin
+  gamma: 0.5                  # Temporal decay parameter γ for β(Δt)
+  temporal_gain: 10.0         # Moderate scaling for stable temporal loss
+  
+  # Initial loss component weights (learnable during training)
+  alpha1: 0.4                 # Progression prediction weight
+  alpha2: 0.4                 # PACC regression weight
+  alpha3: 0.05                # Reduced temporal consistency weight to prevent collapse
+  
+  # Loss stability parameters
+  temporal_floor: 0.0001      # Minimum temporal loss value (reduced for debugging)
+  min_weight: 0.01            # Minimum weight value
+  max_weight: 10.0            # Maximum weight value
+
+evaluation:
+  # Evaluation parameters
+  metrics:
+    - "pacc_mse"             # PACC score mean squared error
+    - "c_index"              # Concordance index for survival analysis
+  
+  # Validation frequency
+  validate_every: 1           # Validate every N epochs
+
+logging:
+  # Logging configuration
+  level: "INFO"
+  save_train_log: true
+  save_model_checkpoints: true
+  log_loss_components: true
+  log_attention_weights: false
+
+# Data preprocessing
+preprocessing:
+  normalize_features: true
+  feature_normalization_method: "zscore"  # zscore or minmax
+  handle_missing_values: "mean_imputation"
+  
+# Hardware settings
+hardware:
+  use_cuda: true
+  mixed_precision: false      # Disable for stability during initial training
+  num_workers: 4             # For data loading
+
+# Reproducibility
+reproducibility:
+  deterministic: true
+  benchmark: false
