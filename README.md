@@ -1,5 +1,4 @@
-# 🧠 MAGNET-AD: Multitask Spatiotemporal GNN for Alzheimer's Prediction
-
+# 🧠 Multitask Spatiotemporal GNN for Interpretable Prediction of PACC and Conversion Time in Preclinical Alzheimer
 ## 📌 Overview
 
 MAGNET-AD is a novel multitask spatiotemporal graph neural network (STGNN) designed to predict both the Preclinical Alzheimer's Cognitive Composite (PACC) score and time to AD conversion. It achieves state-of-the-art performance by integrating multimodal data and capturing the complex interplay of biological, structural, and temporal factors in preclinical Alzheimer's Disease.
