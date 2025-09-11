@@ -29,7 +29,7 @@ class PatientSurvivalInfo(NamedTuple):
     """Container for patient survival information"""
     time: float  # conversion time
     event: int   # 1 if event occurred, 0 if censored
-    paccv6: float
+    pacc: float
 
 
 class GraphBuilder:
@@ -177,9 +177,9 @@ class GraphBuilder:
                 
             row = self.clinical_df.loc[mask].iloc[0]
             return PatientSurvivalInfo(
-                time=float(row['TRTENDT_DAYS_T0']),
-                event=int(row['SUBJCOMPTR'] == 1),
-                paccv6=float(row['PACCV6'])
+                time=float(row['TIME']),
+                event=int(row['EVENT'] == 1),
+                pacc=float(row['PACC'])
             )
         except Exception as error:
             return None
@@ -291,12 +291,12 @@ class GraphBuilder:
         try:
             embeddings = {}
             formatted_visit = self.format_visit_code(visit_code)
-            patient_folder = f"A4_MR_T1_{patient_id}_{formatted_visit}"
+            patient_folder = f"{patient_id}_{formatted_visit}"
             emb_path = self.embeddings_base_path / patient_folder
             if not emb_path.exists():
                 return None
             for structure in self.structures:
-                pth_file = emb_path / f"A4_MR_T1_{patient_id}_{formatted_visit}_{structure}.pth"
+                pth_file = emb_path / f"{patient_id}_{formatted_visit}_{structure}.pth"
                 if pth_file.exists():
                     emb = torch.load(pth_file, map_location=self.device, weights_only=True)
                     if emb.dim() == 1:
@@ -590,17 +590,17 @@ class GraphBuilder:
             # Add survival information (per visit)
             times = []
             events = []
-            paccv6_scores = []
+            pacc_scores = []
             for visit in patient_visits:
                 survival_info = self.get_patient_survival_info(patient_id, visit)
                 if survival_info:
                     times.append(survival_info.time)
                     events.append(survival_info.event)
-                    paccv6_scores.append(survival_info.paccv6)
+                    pacc_scores.append(survival_info.pacc_scores)
                     
             data.survival_times = torch.tensor(times)
             data.events = torch.tensor(events)
-            data.paccv6_scores = torch.tensor(paccv6_scores)
+            data.pacc_scores = torch.tensor(pacc_scores)
             
             if self.verbose:
                 print(f"Built graph for patient {patient_id}:")

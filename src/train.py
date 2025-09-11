@@ -127,25 +127,25 @@ def prepare_targets_for_batch(graph_batch: HeteroData) -> torch.Tensor:
     if not hasattr(graph_batch, 'patient_ids'):
         raise ValueError("Graph batch missing 'patient_ids' attribute")
     
-    if not hasattr(graph_batch, 'paccv6_scores'):
-        raise ValueError("Graph batch missing 'paccv6_scores' attribute")
+    if not hasattr(graph_batch, 'pacc_scores'):
+        raise ValueError("Graph batch missing 'pacc_scores' attribute")
     
     if len(graph_batch.patient_ids) == 0:
         logger.warning("Empty patient_ids list")
         return torch.tensor([], dtype=torch.float32)
     
-    if len(graph_batch.paccv6_scores) == 0:
-        logger.warning("Empty paccv6_scores list")
+    if len(graph_batch.pacc_scores) == 0:
+        logger.warning("Empty pacc_scores list")
         return torch.tensor([], dtype=torch.float32)
     
     # Each patient has one target (1:1 correspondence)
-    if len(graph_batch.patient_ids) != len(graph_batch.paccv6_scores):
-        raise ValueError(f"Mismatch: {len(graph_batch.patient_ids)} patients but {len(graph_batch.paccv6_scores)} PACC scores")
+    if len(graph_batch.patient_ids) != len(graph_batch.pacc_scores):
+        raise ValueError(f"Mismatch: {len(graph_batch.patient_ids)} patients but {len(graph_batch.pacc_scores)} PACC scores")
     
     # Extract PACC scores directly
     targets = []
     for i, patient_id in enumerate(graph_batch.patient_ids):
-        pacc_score = graph_batch.paccv6_scores[i]
+        pacc_score = graph_batch.pacc_scores[i]
         
         # Validate PACC score
         if torch.isnan(pacc_score) or torch.isinf(pacc_score):

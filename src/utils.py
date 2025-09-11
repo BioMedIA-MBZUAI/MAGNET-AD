@@ -214,7 +214,7 @@ def collate_hetero_data(batch: List[HeteroData]) -> HeteroData:
         patient_visits = []
         survival_times_list = []
         events_list = []
-        paccv6_scores_list = []
+        pacc_scores_list = []
 
         for data in batch:
             patient_ids.append(data.patient_id)
@@ -236,17 +236,17 @@ def collate_hetero_data(batch: List[HeteroData]) -> HeteroData:
             else:
                 events_list.append(0.0)
                 
-            if hasattr(data, 'paccv6_scores') and len(data.paccv6_scores) > 0:
-                paccv6_scores_list.append(data.paccv6_scores[-1].item())  # Use last visit
+            if hasattr(data, 'pacc_scores') and len(data.pacc_scores) > 0:
+                pacc_scores_list.append(data.pacc_scores[-1].item())  # Use last visit
             else:
-                paccv6_scores_list.append(0.0)
+                pacc_scores_list.append(0.0)
 
         # Store metadata in batched data
         batched_data.patient_ids = patient_ids
         batched_data.patient_visits = patient_visits
         batched_data.survival_times = torch.tensor(survival_times_list)
         batched_data.events = torch.tensor(events_list)
-        batched_data.paccv6_scores = torch.tensor(paccv6_scores_list)
+        batched_data.pacc_scores = torch.tensor(pacc_scores_list)
 
         return batched_data
 

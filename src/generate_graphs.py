@@ -201,7 +201,7 @@ def validate_graph_structure(graph):
                     return False
         
         # Check required metadata
-        required_attrs = ['patient_id', 'visits', 'survival_times', 'events', 'paccv6_scores']
+        required_attrs = ['patient_id', 'visits', 'survival_times', 'events', 'pacc_scores']
         for attr in required_attrs:
             if not hasattr(graph, attr):
                 return False
